@@ -18,8 +18,6 @@ systemctl status apache2
 
 ### Download and installation PHP 8.3
 ```bash
-wget https://packages.sury.org/php/apt.gpg -O /usr/share/keyrings/deb.sury.org-php.gpg
-
 apt-get update
 
 apt-get -y install lsb-release ca-certificates curl
@@ -31,6 +29,8 @@ dpkg -i /tmp/debsuryorg-archive-keyring.deb
 sh -c 'echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
 
 apt-get update
+
+apt-get install php8.3
 ```
 
 ### Download Extensions PHP 8.3
