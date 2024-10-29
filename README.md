@@ -186,7 +186,7 @@ systemctl reload apache2
 You must activate "*session.cookie_httponly*" indicating "on" in this file : 
 
 ```bash
-nano /etc/php/8.2/fpm/php.ini
+nano /etc/php/8.3/fpm/php.ini
 ```
 
 And restart php8.3-fpm :
