@@ -71,7 +71,7 @@ Go in /tmp to download GLPI :
 ```bash
 cd /tmp
 
-wget https://github.com/glpi-project/glpi/releases/download/10.0.10/glpi-10.0.10.tgz
+wget https://github.com/glpi-project/glpi/releases/download/10.0.X/glpi-10.0.X.tgz #replace 10.0.X with the latest version
 
 tar -xzvf glpi-10.0.X.tgz -C /var/www/html # replace X by your version
 
