@@ -135,34 +135,98 @@ And write this :
 To configurate apache2, you need to create a configuration file (.conf) with your url of your website (example : support.gpsea.fr)
 
 ```bash
-nano /etc/apache2/sites-available/support.gpsea.fr.conf
+nano /etc/apache2/sites-available/glpi.support.fr.conf
 ```
 ```conf
 <VirtualHost *:80>
-    ServerName support.gpsea.fr # replace by your url of your website
+    ServerName glpi
+    ServerAlias glpi.support.fr
+    ServerAdmin alertecluster@support.fr
+    Redirect / https://glpi.support.fr/
+    DocumentRoot "/var/www/html/glpi/public"
+    Alias "/glpi" "/var/www/html/glpi/public"
 
-    DocumentRoot /var/www/html/glpi/public
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
 
     # If you want to place GLPI in a subfolder of your site (e.g. your virtual host is serving multiple applications),
     # you can use an Alias directive. If you do this, the DocumentRoot directive MUST NOT target the GLPI directory itself.
-    # Alias "/glpi" "/var/www/html/glpi/public"
+    # Alias "/glpi" "/var/www/glpi/public"
 
-    <Directory /var/www/html/glpi/public>
+    <Directory "/var/www/html/glpi/public">
+        Options FollowSymLinks MultiViews
+        AllowOverride All
         Require all granted
-
         RewriteEngine On
 
-        # Redirect all requests to GLPI router, unless file exists.
         RewriteCond %{REQUEST_FILENAME} !-f
         RewriteRule ^(.*)$ index.php [QSA,L]
     </Directory>
+
+    <Directory "/var/www/html/glpi">
+        Options FollowSymLinks
+        AllowOverride None
+        Require all denied
+    </Directory>
+
+    <FilesMatch \.php$>
+        SetHandler "proxy:unix:/run/php/php8.3-fpm.sock|fcgi://localhost/"
+    </FilesMatch>
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName glpi
+    ServerAdmin alertecluster@support.fr
+    DocumentRoot "/var/www/html/glpi/public"
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    SSLEngine on
+    SSLCertificateFile      /etc/apache2/SSL2024/certif2024.pem
+    SSLCertificateKeyFile /etc/apache2/SSL2024/clecertif2024.key
+
+    ServerSignature Off
+#   ServerTokens Prod
+
+    # If you want to place GLPI in a subfolder of your site (e.g. your virtual host is serving multiple applications),
+    # you can use an Alias directive. If you do this, the DocumentRoot directive MUST NOT target the GLPI directory itself.
+    # Alias "/glpi" "/var/www/glpi/public"
+
+    <Directory "/var/www/html/glpi/public">
+        Options FollowSymLinks MultiViews
+        AllowOverride All
+        Require all granted
+        RewriteEngine On
+
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteRule ^(.*)$ index.php [QSA,L]
+    </Directory>
+
+    <Directory "/var/www/html/glpi">
+        Options FollowSymLinks
+        AllowOverride None
+        Require all denied
+    </Directory>
+
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+        SSLOptions +StdEnvVars
+    </FilesMatch>
+
+    <Directory /usr/lib/cgi-bin>
+        SSLOptions +StdEnvVars
+    </Directory>
+
+    <FilesMatch \.php$>
+        SetHandler "proxy:unix:/run/php/php8.3-fpm.sock|fcgi://localhost/"
+    </FilesMatch>
 </VirtualHost>
 ```
 
 Now, you can activate your website
 
 ```bash
-a2ensite support.gpsea.fr.conf
+a2ensite glpi.support.fr.conf
 
 a2dissite 000-default.conf
 
@@ -193,20 +257,6 @@ And restart php8.3-fpm :
 
 ```bash
 systemctl restart php8.3-fpm.service
-```
-
-Add these lines in your configuration file and restart Apache2 :
-
-```bash
-nano /etc/apache2/sites-available/support.gpsea.fr.conf
-```
-```conf
-<FilesMatch \.php$>
-    SetHandler "proxy:unix:/run/php/php8.3-fpm.sock|fcgi://localhost/"
-</FilesMatch>
-```
-```bash
-systemctl restart apache2
 ```
 
 ## Installation GLPI
